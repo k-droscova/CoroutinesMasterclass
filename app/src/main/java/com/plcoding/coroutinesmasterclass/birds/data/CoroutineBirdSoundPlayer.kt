@@ -2,6 +2,7 @@ package com.plcoding.coroutinesmasterclass.birds.data
 
 import com.plcoding.coroutinesmasterclass.birds.domain.Bird
 import com.plcoding.coroutinesmasterclass.birds.domain.BirdSoundPlayer
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,9 +17,9 @@ class CoroutineBirdSoundPlayer: BirdSoundPlayer {
 
     override fun playBirdSound(bird: Bird) {
         currentJob?.cancel()
-        currentJob = scope.launch {
+        currentJob = scope.launch(CoroutineName(bird.name)) {
             while (true) {
-                println(bird.sound)
+                println("${bird.sound} from ${coroutineContext[CoroutineName]?.name} on thread ${Thread.currentThread().name}")
                 delay(bird.intervalMillis)
             }
         }
