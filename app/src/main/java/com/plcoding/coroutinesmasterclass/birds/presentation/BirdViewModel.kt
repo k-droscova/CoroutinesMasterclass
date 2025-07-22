@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class BirdViewModel : ViewModel() {
-    private val birdPlayer: BirdSoundPlayer = CoroutineBirdSoundPlayer(viewModelScope)
+    private val birdPlayer: BirdSoundPlayer = CoroutineBirdSoundPlayer()
     private val _currentBird = MutableStateFlow<Bird?>(null)
     val currentBird = _currentBird.asStateFlow()
 
@@ -25,6 +25,6 @@ class BirdViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        birdPlayer.stopPlaying()
+        birdPlayer.stop()
     }
 }
