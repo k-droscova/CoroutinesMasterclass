@@ -1,13 +1,14 @@
 package com.plcoding.coroutinesmasterclass.util
 
 import android.graphics.Bitmap
+import androidx.core.graphics.get
 
 object PhotoProcessor {
     fun findDominantColor(image: Bitmap): Int {
         val colorCounts = mutableMapOf<Int, Int>()
         for (x in 0 until image.width) {
             for (y in 0 until image.height) {
-                val pixelColor = image.getPixel(x, y)
+                val pixelColor = image[x, y]
                 colorCounts[pixelColor] = colorCounts.getOrDefault(pixelColor, 0) + 1
             }
         }
