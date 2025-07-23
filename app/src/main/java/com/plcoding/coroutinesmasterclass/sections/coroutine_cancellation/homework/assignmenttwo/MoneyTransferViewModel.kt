@@ -4,14 +4,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MoneyTransferViewModel : ViewModel() {
+class MoneyTransferViewModel(
+    private val applicationScope: CoroutineScope
+) : ViewModel() {
 
     var state by mutableStateOf(MoneyTransferState())
         private set
@@ -68,17 +74,23 @@ class MoneyTransferViewModel : ViewModel() {
                         return@withContext
                     }
 
+                    // Launch this in viewModelScope to ensure that we can cancel the transfer while the money is still being withdrawn from the savings account
                     debitAccount(state.savingsBalance, amountToTransfer)
-                    creditAccount(state.checkingBalance, amountToTransfer)
-
-                    state = state.copy(
-                        resultMessage = "Transfer complete!",
-                    )
+                    // Launch transfer in applicationScope to ensure that if the transfer is cancelled after the money has been withdrawn from the savings account, the money will be transferred to the checking account
+                    applicationScope.launch {
+                        creditAccount(state.checkingBalance, amountToTransfer)
+                        state = state.copy(
+                            resultMessage = "Transfer complete!",
+                        )
+                    }.join()
 
                 } catch (e: Exception) {
+                    coroutineContext.ensureActive()
                     println("Error processing transfer: ${e.message}")
                 } finally {
-                    cleanupResources()
+                    withContext(NonCancellable) {
+                        cleanupResources()
+                    }
                     state = state.copy(
                         processingState = null,
                         isTransferring = false,
@@ -118,5 +130,18 @@ class MoneyTransferViewModel : ViewModel() {
             processingState = ProcessingState.CleanupResources,
         )
         delay(2000)
+    }
+}
+
+class MoneyTransferViewModelFactory(
+    private val applicationScope: CoroutineScope
+) : ViewModelProvider.Factory {
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MoneyTransferViewModel::class.java)) {
+            return MoneyTransferViewModel(applicationScope) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

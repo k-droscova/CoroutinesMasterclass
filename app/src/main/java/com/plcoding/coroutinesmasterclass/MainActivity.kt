@@ -4,9 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.plcoding.coroutinesmasterclass.sections.coroutine_cancellation.homework.assignmenttwo.MoneyTransferViewModel
 import com.plcoding.coroutinesmasterclass.sections.coroutine_cancellation.homework.assignmenttwo.MoneyTransferScreen
+import com.plcoding.coroutinesmasterclass.sections.coroutine_cancellation.homework.assignmenttwo.MoneyTransferViewModelFactory
 import com.plcoding.coroutinesmasterclass.ui.theme.CoroutinesMasterclassTheme
 
 class MainActivity : ComponentActivity() {
@@ -15,7 +17,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CoroutinesMasterclassTheme {
-                val viewModel: MoneyTransferViewModel = viewModel()
+                val viewModel: MoneyTransferViewModel by viewModels {
+                    MoneyTransferViewModelFactory((application as MyApplication).applicationScope)
+                }
 
                 MoneyTransferScreen(
                     state = viewModel.state,
