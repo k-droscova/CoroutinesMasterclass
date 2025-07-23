@@ -1,6 +1,8 @@
 package com.plcoding.coroutinesmasterclass.util
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.coroutineContext
 
 object RemoteService {
     suspend fun uploadFile() {
@@ -14,6 +16,7 @@ object RemoteService {
                 index++
                 println("Progress: ${index * 100 / chunks.size}%")
             } catch (e: Exception) {
+                coroutineContext.ensureActive()
                 println("Error uploading file: ${e.message}")
             }
         }
