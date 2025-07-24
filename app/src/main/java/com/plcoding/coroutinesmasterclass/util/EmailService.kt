@@ -1,8 +1,10 @@
 package com.plcoding.coroutinesmasterclass.util
 
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlin.random.Random
 
 object EmailService {
@@ -13,9 +15,12 @@ object EmailService {
     }
 
     suspend fun sendNewsletter() {
-        coroutineScope {
+        val handler: CoroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+            throwable.printStackTrace()
+        }
+        supervisorScope {
             mailingList.forEach { emailAddress ->
-                launch {
+                launch(handler) {
                     sendEmail(emailAddress)
                 }
             }
