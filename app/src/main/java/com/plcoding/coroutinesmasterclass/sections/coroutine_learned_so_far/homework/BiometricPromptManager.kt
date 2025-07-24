@@ -34,14 +34,17 @@ class BiometricPromptManager(
             when (manager.canAuthenticate(authenticators)) {
                 BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> {
                     continuation.resume(BiometricResult.HardwareUnavailable)
+                    return@suspendCancellableCoroutine
                 }
 
                 BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
                     continuation.resume(BiometricResult.FeatureUnavailable)
+                    return@suspendCancellableCoroutine
                 }
 
                 BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
                     continuation.resume(BiometricResult.AuthenticationNotSet)
+                    return@suspendCancellableCoroutine
                 }
 
                 else -> Unit
@@ -67,6 +70,10 @@ class BiometricPromptManager(
                 }
             )
             prompt.authenticate(promptInfo.build())
+
+            continuation.invokeOnCancellation {
+                prompt.cancelAuthentication() // Cancel properly
+            }
         }
     }
 }

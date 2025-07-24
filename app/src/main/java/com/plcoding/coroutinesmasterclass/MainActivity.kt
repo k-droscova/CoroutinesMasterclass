@@ -21,6 +21,7 @@ import com.plcoding.coroutinesmasterclass.sections.coroutine_learned_so_far.home
 import com.plcoding.coroutinesmasterclass.sections.coroutine_learned_so_far.homework.BiometricResult
 import com.plcoding.coroutinesmasterclass.ui.theme.CoroutinesMasterclassTheme
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.cancellation.CancellationException
@@ -74,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                                 }
                                 if (result == null) {
                                     println("Timeout reached, cancelling...")
-                                    lifecycleScope.cancel()
+                                    lifecycleScope.coroutineContext.cancelChildren()
                                 }
                             }
                         }
